@@ -68,16 +68,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
 
             // Switch case based on the price ID
             switch (priceId) {
-                case process.env.SIX_MONTH:
+                case process.env.MONTH:
                     updatedMetadata = {
                         ...updatedMetadata,
-                        activePlan: `6 Months`,
-                    };
-                    break;
-                case process.env.YEARLY:
-                    updatedMetadata = {
-                        ...updatedMetadata,
-                        activePlan: `Yearly`,
+                        activePlan: `Monthly`,
                     };
                     break;
                 default:
