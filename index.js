@@ -284,13 +284,18 @@ app.post('/cancel-subscription',async(req, res)=>{
 });
 
 
-
+import path from "path";
 app.get('/', async (req, res) => {
     res.json({
         message: `Server is running at ${PORT}`
     });
 });
-
+app.get("/success", (req, res) => {
+  res.sendFile(path.join(__dirname, "success.html"));
+});
+app.get("/cancel", (req, res) => {
+  res.sendFile(path.join(__dirname, "success.html"));
+});
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
