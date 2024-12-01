@@ -41,8 +41,8 @@ app.post("/create-subscription", async (req, res) => {
       ],
       mode: "subscription",
       customer: customerId,
-      success_url: "chrome-extension://ncipbdpfdmlidminmhfbbfeekedigapc/tabs/index.html",
-      cancel_url: 'chrome-extension://ncipbdpfdmlidminmhfbbfeekedigapc/tabs/index.html',
+      success_url: `${process.env.SUCCESS_URL}`,
+      cancel_url: `${process.env.CANCEL_URL}`,
     });
 
     // Send the session URL back to the client
