@@ -41,8 +41,8 @@ app.post("/create-subscription", async (req, res) => {
       ],
       mode: "subscription",
       customer: customerId,
-      success_url: `${process.env.SUCCESS_URL}`,
-      cancel_url: `${process.env.CANCEL_URL}`,
+      success_url: `https://stripe-backend-pi-wheat.vercel.app/success`,
+      cancel_url: `https://stripe-backend-pi-wheat.vercel.app/cancel`,
     });
 
     // Send the session URL back to the client
