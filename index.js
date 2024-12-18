@@ -94,6 +94,46 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
 
 app.use(express.json());
 
+// async function handleCustomerSubscription(email) {
+//     try {
+//         const customers = await stripe.customers.list({ email, limit: 1 });
+
+//         let customer;
+//         if (customers.data.length > 0) {
+//             customer = customers.data[0];
+//         } else {
+//             customer = await stripe.customers.create({ email });
+//         }
+
+//         const subscriptions = await stripe.subscriptions.list({
+//             customer: customer.id,
+//             status: 'active',
+//             limit: 1,
+//         });
+
+//         const defaultMetadata = {
+//             customerId: customer.id,
+//             isSubscribed: 'false',
+//             activePlan: "free",
+//             subscriptionId: null,
+//         };
+
+//         if (Object.keys(customer.metadata).length === 0) {
+//             await stripe.customers.update(customer.id, {
+//                 metadata: defaultMetadata,
+//             });
+//         }
+
+//         if (subscriptions.data.length > 0) {
+//             return { subscription: true, metadata: customer.metadata };
+//         } else {
+//             return { subscription: false, metadata: customer.metadata };
+//         }
+//     } catch (error) {
+//         console.error('Error handling customer subscription:', error);
+//         throw e, priceIdrror;
+//     }
+// }
 async function handleCustomerSubscription(email) {
     try {
         const customers = await stripe.customers.list({ email, limit: 1 });
@@ -111,27 +151,44 @@ async function handleCustomerSubscription(email) {
             limit: 1,
         });
 
-        const defaultMetadata = {
-            customerId: customer.id,
-            isSubscribed: 'false',
-            activePlan: "free",
-            subscriptionId: null,
-        };
-
-        if (Object.keys(customer.metadata).length === 0) {
-            await stripe.customers.update(customer.id, {
-                metadata: defaultMetadata,
-            });
-        }
+        let updatedMetadata;
 
         if (subscriptions.data.length > 0) {
-            return { subscription: true, metadata: customer.metadata };
+            const activeSubscription = subscriptions.data[0];
+            updatedMetadata = {
+                customerId: customer.id,
+                isSubscribed: 'true',
+                activePlan: activeSubscription.plan.nickname || "Monthly", // Set plan nickname if available
+                subscriptionId: activeSubscription.id,
+            };
+
+            // Update metadata to reflect active subscription
+            await stripe.customers.update(customer.id, {
+                metadata: updatedMetadata,
+            });
         } else {
-            return { subscription: false, metadata: customer.metadata };
+            updatedMetadata = {
+                customerId: customer.id,
+                isSubscribed: 'false',
+                activePlan: "free",
+                subscriptionId: null,
+            };
+
+            // Update metadata to default values
+            if (Object.keys(customer.metadata).length === 0) {
+                await stripe.customers.update(customer.id, {
+                    metadata: updatedMetadata,
+                });
+            }
         }
+
+        return {
+            subscription: subscriptions.data.length > 0,
+            metadata: updatedMetadata || customer.metadata,
+        };
     } catch (error) {
         console.error('Error handling customer subscription:', error);
-        throw e, priceIdrror;
+        throw error;
     }
 }
 
