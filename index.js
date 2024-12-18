@@ -131,11 +131,11 @@ async function handleCustomerSubscription(email) {
         }
     } catch (error) {
         console.error('Error handling customer subscription:', error);
-        throw error;
+        throw e, priceIdrror;
     }
 }
 
-async function createCheckoutSession(customerId) {
+async function createCheckoutSession(customerId, priceId) {
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -192,8 +192,8 @@ app.post('/get-subscription', async (req, res) => {
 
 app.post('/create-subscription', async (req, res) => {
     try {
-        const { customerId } = req.body;
-        const data = await createCheckoutSession(customerId);
+        const { customerId, priceId } = req.body;
+        const data = await createCheckoutSession(customerId, priceId);
         res.send(data);
     } catch (error) {
         res.send(error.message);
