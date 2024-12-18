@@ -213,6 +213,7 @@ app.post('/cancel-subscription', async (req, res) => {
 app.get('/', async (req, res) => {
     res.json({
         message: `Server is running at ${PORT}`,
+        success: true
     });
 });
 
