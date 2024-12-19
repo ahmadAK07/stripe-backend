@@ -200,7 +200,7 @@ async function createCheckoutSession(customerId, priceId) {
             customer: customerId,
             line_items: [
                 {
-                    price: process.env.MONTH,
+                    price: priceId,
                     quantity: 1,
                 },
             ],
