@@ -204,8 +204,8 @@ async function createCheckoutSession(customerId, priceId) {
                     quantity: 1,
                 },
             ],
-            success_url: process.env.SUCCESS_URL,
-            cancel_url: process.env.CANCEL_URL,
+            success_url: process.env.SUCCESS_URL || "https://www.amazon.com/creatorhub/",
+            cancel_url: process.env.CANCEL_URL || "https://www.amazon.com/creatorhub/",
         });
 
         return {
