@@ -229,7 +229,7 @@ async function createCheckoutSession(customerId, priceId, couponId) {
     console.log("coupon code: ", couponId);
     try {
         let session;
-         if(couponId.length > 0){
+         if(couponId?.length > 0){
             session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
                 mode: 'subscription',
