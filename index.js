@@ -227,6 +227,7 @@ async function createSubscriptionWithTrial(customerId, priceId) {
 
 async function createCheckoutSession(customerId, priceId, couponId) {
     console.log("coupon code: ", couponId);
+    console.log("price Id: ", priceId);
     try {
         let session;
          if(couponId?.length > 0){
@@ -236,7 +237,7 @@ async function createCheckoutSession(customerId, priceId, couponId) {
                 customer: customerId,
                 line_items: [
                     {
-                        price: process.env.MONTH,
+                        price: priceId,
                         quantity: 1,
                     },
                 ],
@@ -254,7 +255,7 @@ async function createCheckoutSession(customerId, priceId, couponId) {
                 customer: customerId,
                 line_items: [
                     {
-                        price: process.env.MONTH,
+                        price: priceId,
                         quantity: 1,
                     },
                 ],
@@ -274,7 +275,7 @@ async function createCheckoutSession(customerId, priceId, couponId) {
         console.error('Error creating checkout session:', error);
         return {
             success: false,
-            message: error.message,
+            message: error.message
         };
     }
 }
