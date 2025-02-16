@@ -2,8 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import Stripe from 'stripe';
-
+import multer from "multer";
+import CloudConvert from "cloudconvert";
+import stream from "stream";
 dotenv.config();
+const cloudConvert = new CloudConvert(process.env.CLOUDCONVERT_API_KEY);
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 console.log("SUCCESS_URL: ", process.env.SUCCESS_URL);
 console.log("webhook: ", process.env.WEBHOOK_SECRET);
 console.log("sk stripe: ", process.env.STRIPE_SK);
@@ -15,7 +20,52 @@ app.use(cors());
 
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = process.env.WEBHOOK_SECRET;
+app.post("/convert", upload.single("video"), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
 
+        // Create a readable stream from the file buffer
+        const fileStream = new stream.PassThrough();
+        fileStream.end(req.file.buffer);
+
+        // Upload the file directly to CloudConvert
+        const job = await cloudConvert.jobs.create({
+            tasks: {
+                "import-file": {
+                    operation: "import/upload"
+                },
+                "convert": {
+                    operation: "convert",
+                    input: "import-file",
+                    output_format: "mp4" // Change format as needed
+                },
+                "export-file": {
+                    operation: "export/url",
+                    input: "convert"
+                }
+            }
+        });
+
+        const uploadTask = job.tasks.find(task => task.name === "import-file");
+
+        // Upload the file
+        await cloudConvert.tasks.upload(uploadTask, fileStream, req.file.originalname);
+
+        // Wait for job completion
+        const completedJob = await cloudConvert.jobs.wait(job.id);
+        const exportTask = completedJob.tasks.find(task => task.name === "export-file");
+
+        // Get download URL
+        const fileUrl = exportTask.result.files[0].url;
+        
+        res.json({ success: true, fileUrl });
+    } catch (error) {
+        console.error("Error processing file:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
 
