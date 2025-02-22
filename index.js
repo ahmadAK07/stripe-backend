@@ -14,6 +14,7 @@ const stripe = Stripe(process.env.STRIPE_SK);
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -147,7 +148,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
     response.send();
 });
 
-app.use(express.json());
+
 
 async function handleCustomerSubscription(email, priceId) {
     try {
