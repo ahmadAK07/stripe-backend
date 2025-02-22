@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+const cloudinary = require("cloudinary").v2;
 import Stripe from 'stripe';
 dotenv.config();
 console.log("SUCCESS_URL: ", process.env.SUCCESS_URL);
@@ -11,10 +12,27 @@ const stripe = Stripe(process.env.STRIPE_SK);
 
 const app = express();
 app.use(cors());
-
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = process.env.WEBHOOK_SECRET;
+app.delete("/delete-video", async (req, res) => {
+    const { public_id } = req.body; // Get public_id from request
 
+    if (!public_id) {
+        return res.status(400).json({ error: "Missing public_id" });
+    }
+
+    try {
+        const result = await cloudinary.uploader.destroy(public_id, { resource_type: "video" });
+        return res.json(result);
+    } catch (error) {
+        return res.status(500).json({ error: "Failed to delete video", details: error });
+    }
+});
 app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
 
