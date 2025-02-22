@@ -1,8 +1,10 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
 const cloudinary = require("cloudinary").v2;
-import Stripe from 'stripe';
+const Stripe = require("stripe");
+
+// Load environment variables
 dotenv.config();
 console.log("SUCCESS_URL: ", process.env.SUCCESS_URL);
 console.log("webhook: ", process.env.WEBHOOK_SECRET);
