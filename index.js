@@ -22,22 +22,18 @@ cloudinary.config({
 });
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = process.env.WEBHOOK_SECRET;
-app.post('/delete-video', async (req, res) => {
+app.post("/delete-video", async (req, res) => {
+    const { public_id } = req.body; // Get public_id from request
+
+    if (!public_id) {
+        return res.status(400).json({ error: "Missing public_id" });
+    }
+
     try {
-        const { videoId } = req.body; // Get the ID from request body
-        if (!videoId) {
-            return res.status(400).json({ error: "Missing video ID" });
-        }
-        
-        const result = await VideoModel.findByIdAndDelete(videoId);
-        if (!result) {
-            return res.status(404).json({ error: "Video not found" });
-        }
-        
-        res.json({ message: "Video deleted successfully" });
+        const result = await cloudinary.uploader.destroy(public_id, { resource_type: "video" });
+        return res.json(result);
     } catch (error) {
-        console.error("Delete error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Failed to delete video", details: error });
     }
 });
 
